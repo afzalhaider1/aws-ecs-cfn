@@ -6,7 +6,7 @@ Parameters:
   ImageId:
       Description: ami value
       Type: String
-      Default: ami-01a4f99c4ac11b03c
+      Default: ami-06d94a781b544c133
 Resources:
   EC2Instance: 
     Type: AWS::EC2::Instance
