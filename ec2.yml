@@ -3,13 +3,36 @@ Parameters:
       Description: WebServer EC2 instance type
       Type: String
       Default: t3.small
+  ImageId:
+      Description: ami value
+      Type: String
+      Default: ami-01a4f99c4ac11b03c
 Resources:
   EC2Instance: 
     Type: AWS::EC2::Instance
     Properties: 
-      ImageId: "ami-01a4f99c4ac11b03c"
+      ImageId: !Ref 'ImageId'
       KeyName: "mumbai"
       InstanceType: !Ref 'InstanceType'
+      SecurityGroups:
+      - launch-wizard-2
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            yum update -y
+            yum install -y httpd.x86_64
+            systemctl start httpd.service
+            systemctl enable httpd.service
+            echo ?Hello World from $(hostname -f)? > /var/www/html/index.html
+  EC2Instance1: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: !Ref 'ImageId'
+      KeyName: "mumbai"
+      InstanceType: !Ref 'InstanceType'
+      SecurityGroups:
+      - launch-wizard
       UserData:
         Fn::Base64: 
           !Sub |

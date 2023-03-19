@@ -1,4 +1,4 @@
 Create stack:  
-aws cloudformation create-stack --stack-name example-deployment --template-body file://./ecs.yml --capabilities CAPABILITY_NAMED_IAM --parameters 'ParameterKey=SubnetID,ParameterValue=subnet-1881f750'
+aws cloudformation create-stack --stack-name example-deployment --template-body file://./ecs.yml --capabilities CAPABILITY_NAMED_IAM --parameters 'ParameterKey=SubnetID,ParameterValue=subnet-1195677a'
 
 aws cloudformation create-stack --stack-name myteststack --template-body file://./ecs.yml --capabilities CAPABILITY_NAMED_IAM --parameters 'ParameterKey=SubnetID,ParameterValue=subnet-e73dec9c'
