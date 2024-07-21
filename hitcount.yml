@@ -4,12 +4,25 @@ Resources:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 10.0.0.0/16
-
   Subnet:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
+      AvailabilityZone: ap-south-1a
+      Tags:
+        - Key: Name
+          Value: Subnet
+
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: ap-south-1b
+      Tags:
+        - Key: Name
+          Value: Subnet2
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -90,6 +103,7 @@ Resources:
     Properties:
       Subnets:
         - !Ref Subnet
+        - !Ref Subnet2
       SecurityGroups:
         - !Ref SecurityGroup
 
