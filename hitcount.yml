@@ -44,7 +44,7 @@ Resources:
       Family: deployment-hit-task
       Cpu: 256
       Memory: 512
-      NetworkMode: awsvpc
+      NetworkMode: bridge
       ExecutionRoleArn: !Ref ExecutionRole
       ContainerDefinitions:
         - Name: redis
@@ -62,11 +62,6 @@ Resources:
           Image: devopsjuly22017/web
           PortMappings:
             - ContainerPort: 5000Environment:
-          Environment:
-            - Name: REDIS_HOST
-              Value: redis
-            - Name: REDIS_PORT
-              Value: "6379"
           LogConfiguration:
             LogDriver: awslogs
             Options:
