@@ -111,16 +111,23 @@ Resources:
           Essential: true
           PortMappings:
             - ContainerPort: 6379
-
   ECSService:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSContainerTask
       DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref Subnet
+          SecurityGroups:
+            - !Ref SecurityGroup
       LoadBalancers:
         - ContainerName: web
-          ContainerPort: 5000
+          ContainerPort: 80
           TargetGroupArn: !Ref ApplicationTargetGroup
       Role: !GetAtt ECSServiceRole.Arn
 
