@@ -61,7 +61,7 @@ Resources:
         - Name: web
           Image: devopsjuly22017/web
           PortMappings:
-            - ContainerPort: 5000Environment:
+            - ContainerPort: 5000
           LogConfiguration:
             LogDriver: awslogs
             Options:
