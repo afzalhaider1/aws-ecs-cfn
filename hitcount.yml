@@ -1,142 +1,88 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
-  VPC:
+  SubnetID:
     Type: String
-    Default: vpc-12f92c79
-  Subnet:
-    Type: String
-    Default: subnet-1195677a
-  Subnet2:
-    Type: String
-    Default: subnet-e58fafa9
+    Default: subnet-0b8314f06f0659a38
 Resources:
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Allow HTTP and Redis access
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 6379
-          ToPort: 6379
-          CidrIp: 0.0.0.0/0
-
-  ECSCluster:
+  Cluster:
     Type: AWS::ECS::Cluster
-
-  ECSTaskExecutionRole:
+    Properties:
+      ClusterName: deployment-hit-cluster
+  RedisLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: deployment-web-log-group
+  WebLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: deployment-redis-log-group
+  ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: deployment-hit-role
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
             Action: sts:AssumeRole
-      Policies:
-        - PolicyName: ECSExecutionPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ecr:GetAuthorizationToken
-                  - ecr:BatchCheckLayerAvailability
-                  - ecr:GetDownloadUrlForLayer
-                  - ecr:BatchGetImage
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: "*"
-
-  ECSServiceRole:
-    Type: AWS::IAM::Role
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: ECSServicePolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ecs:CreateCluster
-                  - ecs:DeregisterContainerInstance
-                  - ecs:DiscoverPollEndpoint
-                  - ecs:Poll
-                  - ecs:RegisterContainerInstance
-                  - ecs:StartTelemetrySession
-                  - ecs:Submit
-                  - ec2:AuthorizeSecurityGroupIngress
-                  - ec2:Describe*
-                  - elasticloadbalancing:DeregisterInstancesFromLoadBalancer
-                  - elasticloadbalancing:Describe*
-                  - elasticloadbalancing:RegisterInstancesWithLoadBalancer
-                Resource: "*"
-
-  ApplicationLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Subnets:
-        - !Ref Subnet
-        - !Ref Subnet2
-      SecurityGroups:
-        - !Ref SecurityGroup
-
-  ECSContainerTask:
+      GroupName: ContainerSecurityGroup
+      GroupDescription: Security group for NGINX container
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
+          CidrIp: 0.0.0.0/0
+  TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: hitcount-app
-      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      Family: deployment-hit-task
+      Cpu: 256
+      Memory: 512
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !Ref ExecutionRole
       ContainerDefinitions:
-        - Name: web
-          Image: devopsjuly22017/web:latest
-          Memory: 512
-          Essential: true
-          PortMappings:
-            - ContainerPort: 5000
         - Name: redis
           Image: redis
-          Memory: 512
           Essential: true
           PortMappings:
             - ContainerPort: 6379
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref RedisLogGroup
+              awslogs-stream-prefix: ecs
+        - Name: web
+          Image: devopsjuly22017/web
+          PortMappings:
+            - ContainerPort: 5000
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref WebLogGroup
+              awslogs-stream-prefix: ecs
       RequiresCompatibilities:
         - EC2
         - FARGATE
-  ECSService:
+  Service:
     Type: AWS::ECS::Service
     Properties:
-      Cluster: !Ref ECSCluster
-      TaskDefinition: !Ref ECSContainerTask
+      ServiceName: deployment-hit-service
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref TaskDefinition
       DesiredCount: 1
       LaunchType: FARGATE
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Ref Subnet
+            - !Ref SubnetID
           SecurityGroups:
-            - !Ref SecurityGroup
-      LoadBalancers:
-        - ContainerName: web
-          ContainerPort: 80
-          TargetGroupArn: !Ref ApplicationTargetGroup
-
-  ApplicationTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      VpcId: !Ref VPC
-      Port: 5000
-      Protocol: HTTP
-      TargetType: ip
+            - !GetAtt ContainerSecurityGroup.GroupId
