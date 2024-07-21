@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: InlineLambdaFunction
+      Handler: index.handler
+      Role: arn:aws:iam::123456789012:role/execution_role
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              print("Received event:", event)
+              return "Hello from Inline Lambda!"
+      Runtime: python3.8
+      Description: A simple inline Lambda function
+      Timeout: 3
+      MemorySize: 128
