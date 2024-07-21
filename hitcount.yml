@@ -111,6 +111,9 @@ Resources:
           Essential: true
           PortMappings:
             - ContainerPort: 6379
+      RequiresCompatibilities:
+        - EC2
+        - FARGATE
   ECSService:
     Type: AWS::ECS::Service
     Properties:
