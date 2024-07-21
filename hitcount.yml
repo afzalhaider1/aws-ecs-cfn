@@ -132,7 +132,7 @@ Resources:
   JenService:
     Type: AWS::ECS::Service
     Properties:
-      ServiceName: deployment-hit-service
+      ServiceName: deployment-jen-service
       Cluster: !Ref Cluster
       TaskDefinition: !Ref JenTaskDefinition
       DesiredCount: 1
