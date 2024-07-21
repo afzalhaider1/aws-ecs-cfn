@@ -1,29 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Resources:
+Parameters:
   VPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: 10.0.0.0/16
+    Type: String
+    Default: vpc-12f92c79
   Subnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.1.0/24
-      AvailabilityZone: ap-south-1a
-      Tags:
-        - Key: Name
-          Value: Subnet
-
+    Type: String
+    Default: subnet-1195677a
   Subnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.2.0/24
-      AvailabilityZone: ap-south-1b
-      Tags:
-        - Key: Name
-          Value: Subnet2
-
+    Type: String
+    Default: subnet-e58fafa9
+Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
