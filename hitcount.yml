@@ -129,7 +129,6 @@ Resources:
         - ContainerName: web
           ContainerPort: 80
           TargetGroupArn: !Ref ApplicationTargetGroup
-      Role: !GetAtt ECSServiceRole.Arn
 
   ApplicationTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
