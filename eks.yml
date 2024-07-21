@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EKS Cluster with Node Group
+
+Resources:
+  EKSCluster:
+    Type: AWS::EKS::Cluster
+    Properties: 
+      Name: MyEKSCluster
+      RoleArn: arn:aws:iam::<your-account-id>:role/EKSClusterRole
+      ResourcesVpcConfig: 
+        SubnetIds: 
+          - subnet-xxxxxxx
+          - subnet-yyyyyyy
+        SecurityGroupIds: 
+          - sg-zzzzzzzz
+
+  NodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+
+  NodeGroup:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      ClusterName: !Ref EKSCluster
+      NodeRole: !GetAtt NodeInstanceRole.Arn
+      Subnets:
+        - subnet-xxxxxxx
+        - subnet-yyyyyyy
+      ScalingConfig:
+        DesiredSize: 2
+        MaxSize: 3
+        MinSize: 2
+      InstanceTypes:
+        - t3.medium
+
+Outputs:
+  ClusterName:
+    Description: The name of the EKS cluster
+    Value: !Ref EKSCluster
+
+  NodeGroupName:
+    Description: The name of the EKS node group
+    Value: !Ref NodeGroup
