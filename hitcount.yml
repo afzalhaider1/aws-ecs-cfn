@@ -35,8 +35,8 @@ Resources:
       GroupDescription: Security group for NGINX container
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 5000
-          ToPort: 5000
+          FromPort: 80
+          ToPort: 80
           CidrIp: 0.0.0.0/0
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
@@ -47,27 +47,37 @@ Resources:
       NetworkMode: bridge
       ExecutionRoleArn: !Ref ExecutionRole
       ContainerDefinitions:
-        - Name: redis
-          Image: redis
-          Essential: true
+        - Name: nginx
+          Image: nginx
           PortMappings:
-            - ContainerPort: 6379
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-region: !Ref AWS::Region
-              awslogs-group: !Ref RedisLogGroup
-              awslogs-stream-prefix: ecs
-        - Name: web
-          Image: devopsjuly22017/web
-          PortMappings:
-            - ContainerPort: 5000
+            - ContainerPort: 80
           LogConfiguration:
             LogDriver: awslogs
             Options:
               awslogs-region: !Ref AWS::Region
               awslogs-group: !Ref WebLogGroup
               awslogs-stream-prefix: ecs
+        # - Name: redis
+        #   Image: redis
+        #   Essential: true
+        #   PortMappings:
+        #     - ContainerPort: 6379
+        #   LogConfiguration:
+        #     LogDriver: awslogs
+        #     Options:
+        #       awslogs-region: !Ref AWS::Region
+        #       awslogs-group: !Ref RedisLogGroup
+        #       awslogs-stream-prefix: ecs
+        # - Name: web
+        #   Image: devopsjuly22017/web
+        #   PortMappings:
+        #     - ContainerPort: 5000
+        #   LogConfiguration:
+        #     LogDriver: awslogs
+        #     Options:
+        #       awslogs-region: !Ref AWS::Region
+        #       awslogs-group: !Ref WebLogGroup
+        #       awslogs-stream-prefix: ecs
       RequiresCompatibilities:
         - EC2
         - FARGATE
