@@ -44,7 +44,7 @@ Resources:
       Family: deployment-hit-task
       Cpu: 256
       Memory: 512
-      NetworkMode: bridge
+      NetworkMode: awsvpc
       ExecutionRoleArn: !Ref ExecutionRole
       ContainerDefinitions:
         - Name: nginx
