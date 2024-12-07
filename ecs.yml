@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   SubnetID:
     Type: String
-    Default: subnet-0b8314f06f0659a38
+    Default: subnet-e58fafa9
 Resources:
   Cluster:
     Type: AWS::ECS::Cluster
